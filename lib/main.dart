@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
-import 'screens/transferencia/lista.dart';
+import 'package:intl/intl.dart';
+import 'screens/dashboard.dart'; // IMPORTANTE: Importar o Dashboard
 
-void main() => runApp(BankApp());
+void main() {
+  // Define o padrão de moeda para o Brasil globalmente
+  Intl.defaultLocale = 'pt_BR';
+  runApp(const BankApp());
+}
 
 class BankApp extends StatelessWidget {
   const BankApp({super.key});
@@ -9,27 +14,21 @@ class BankApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      //theme: ThemeData.dark(), // tema padronizado do flutter
-      home: ListaTransferencias(),
+      debugShowCheckedModeBanner: false, // Remove a faixa de debug
       
-      // Configuração de tema do app
+      // ALTERAÇÃO AQUI: Agora o app começa pelo Dashboard
+      home: const Dashboard(), 
+      
       theme: ThemeData(
-        // Ativa o estilo Material 3, mais atual e com suporte aos widgets modernos
         useMaterial3: true,
-
-        // Define uma paleta de cores a partir de uma cor base (verde, nesse caso)
-        // O Flutter gera automaticamente variações coerentes (primary, secondary, etc.)
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green, // Cor principal do app
+          seedColor: Colors.green,
         ),
-
-        // Define a cor principal do aplicativo para widgets que ainda usam essa propriedade
         primaryColor: Colors.green.shade900,
 
-        // Tema para a AppBar
         appBarTheme: AppBarTheme(
-          backgroundColor: Colors.green.shade900, // Fundo da AppBar
-          foregroundColor: Colors.white,          // Texto e ícones na AppBar
+          backgroundColor: Colors.green.shade900,
+          foregroundColor: Colors.white,
           titleTextStyle: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -37,27 +36,24 @@ class BankApp extends StatelessWidget {
           ),
         ),
 
-        // Tema para botões elevados (substitui o antigo buttonTheme)
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green.shade700, // Cor de fundo do botão
-            foregroundColor: Colors.white,          // Cor do texto/ícones no botão
+            backgroundColor: Colors.green.shade700,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
 
-        // Tema para o FloatingActionButton (FAB)
         floatingActionButtonTheme: FloatingActionButtonThemeData(
-          backgroundColor: Colors.green.shade700, // Cor do botão flutuante
-          foregroundColor: Colors.white,          // Cor do ícone
+          backgroundColor: Colors.green.shade700,
+          foregroundColor: Colors.white,
         ),
 
-        // Tema para campos de texto (TextField, por exemplo)
         inputDecorationTheme: const InputDecorationTheme(
-          border: OutlineInputBorder(), // Define borda padrão
+          border: OutlineInputBorder(),
         ),
       ),     
     );
   }
-} // main
+}

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'formulario.dart';
 import '../../models/transferencia.dart';
+import '../../database/app_database.dart'; // Importante para as funções do banco
+import 'package:intl/intl.dart';
 
 class ListaTransferencias extends StatefulWidget {
-  final List<Transferencia> _transferencias = [];
   @override
   State<StatefulWidget> createState() {
     return ListaTranferenciaState();
@@ -11,56 +12,64 @@ class ListaTransferencias extends StatefulWidget {
 }
 
 class ListaTranferenciaState extends State<ListaTransferencias> {
-  static const _tituloAppBar = 'Transferência';
+  static const _tituloAppBar = 'Transferências';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          _tituloAppBar,
-          style: TextStyle(
-            color: Colors.white70,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+        title: Text(_tituloAppBar),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () => setState(() {}),
           ),
-        ),
-
-        backgroundColor: const Color.fromRGBO(33, 150, 243, 1),
+        ],
       ),
-
-      body: ListView.builder(
-        itemCount: widget._transferencias.length,
-        itemBuilder: (context, indice) {
-          final transferencia = widget._transferencias[indice];
-          return ItemTransferencia(transferencia);
+      // MUDANÇA AQUI: Usamos FutureBuilder para ler o SQLite
+      body: FutureBuilder<List<Transferencia>>(
+        future: buscarTransferencias(), // Função que criamos no app_database.dart
+        builder: (context, snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(child: CircularProgressIndicator());
+            
+            case ConnectionState.done:
+              if (snapshot.hasData) {
+                final List<Transferencia>? transferencias = snapshot.data;
+                if (transferencias != null && transferencias.isNotEmpty) {
+                  return ListView.builder(
+                    itemCount: transferencias.length,
+                    itemBuilder: (context, indice) {
+                      final transferencia = transferencias[indice];
+                      return ItemTransferencia(transferencia);
+                    },
+                  );
+                }
+              }
+              return Center(
+                child: Text('Nenhuma transferência encontrada'),
+              );
+            
+            default:
+              return Center(child: Text('Erro desconhecido'));
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print("Botão + Pressionado!");
-
+          // Usamos Navigator com await para esperar o retorno e atualizar a tela
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) {
-                return FormularioTransferencia();
-              },
+              builder: (context) => FormularioTransferencia(),
             ),
-          ).then((transferenciaRecebida) => _atualiza(transferenciaRecebida));
+          ).then((value) => setState(() {})); // Atualiza a tela ao voltar
         },
         child: Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-  }
-
-  void _atualiza(Transferencia? transferenciaRecebida) {
-    if (transferenciaRecebida != null) {
-      setState(() {
-        widget._transferencias.add(transferenciaRecebida);
-      });
-    }
   }
 }
 
@@ -71,11 +80,12 @@ class ItemTransferencia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formatador = NumberFormat.simpleCurrency(locale: 'pt_BR');
     return Card(
       child: ListTile(
-        leading: Icon(Icons.monetization_on),
-        title: Text(_transferencia.valor.toString()),
-        subtitle: Text(_transferencia.numeroConta.toString()),
+        leading: Icon(Icons.monetization_on, color: Colors.green),
+        title: Text(formatador.format(_transferencia.valor)),
+        subtitle: Text('Conta: ${_transferencia.numeroConta}'),
       ),
     );
   }
